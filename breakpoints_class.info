@@ -1,0 +1,8 @@
+name = Breakpoints class
+description = "Extends body tag classes based on configured breakpoints."
+version = "7.x-2.x-dev"
+core = 7.x
+configure = admin/config/media/breakpoints/class-settings
+dependencies[] = breakpoints
+
+scripts[] = js/breakpoints_class.js

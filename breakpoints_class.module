@@ -1,0 +1,125 @@
+<?php
+/**
+ * @file
+ * Breakpoints Class module.
+ */
+define('BREAKPOINTS_CLASS_CACHE_ID', 'breakpoints_class_cache');
+define('BREAKPOINTS_CLASS_SETTINGS_PREFIX', 'breakpoints_class_prefix');
+define('BREAKPOINTS_CLASS_SETTINGS_DEBUG', 'breakpoints_class_debug');
+define('BREAKPOINTS_CLASS_SETTINGS_THEMES', 'breakpoints_class_themes');
+
+/**
+ * Implements hook_menu().
+ */
+function breakpoints_class_menu() {
+  $items = array();
+
+  //@todo: implement own hook_permission
+  $items['admin/config/media/breakpoints/class-settings'] = array(
+    'title'            => 'Classes',
+    'type'             => MENU_LOCAL_TASK,
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('breakpoints_class_config_form'),
+    'access arguments' => array('administer site configuration'),
+    'weight'           => 30,
+  );
+
+  return $items;
+}
+
+/**
+ * Form for module configuration.
+ * @param $form
+ * @param $form_state
+ * @return mixed
+ */
+function breakpoints_class_config_form($form, &$form_state) {
+  $form = array();
+
+  $form[BREAKPOINTS_CLASS_SETTINGS_PREFIX] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Classes prefix'),
+    '#description'   => t('This value will be used for prefix to body classes for resolving conflicts, for example, with !browserclass module.', array('!browserclass' => l('browserclass', 'https://www.drupal.org/project/browserclass'))),
+    '#default_value' => variable_get(BREAKPOINTS_CLASS_SETTINGS_PREFIX, ''),
+  );
+
+  // Get all themes list for selector.
+  $themes_list = list_themes();
+  $themes_options = array();
+  foreach ($themes_list as $theme_machine_name => $theme) {
+    $themes_options[$theme_machine_name] = $theme->info['name'];
+  }
+
+  $form[BREAKPOINTS_CLASS_SETTINGS_THEMES] = array(
+    '#type'          => 'checkboxes',
+    '#title'         => t('Themes'),
+    '#options'       => $themes_options,
+    '#description'   => t('Apply class adding to selected themes.'),
+    '#default_value' => variable_get(BREAKPOINTS_CLASS_SETTINGS_THEMES, array(variable_get('theme_default'))),
+  );
+
+  $form[BREAKPOINTS_CLASS_SETTINGS_DEBUG] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t('Debug mode'),
+    '#description'   => t('If Debug mode is ON you can see in JS console all logging for jumping between breakpoints and warn when classes adding is restricted by module\'s Themes settings.'),
+    '#default_value' => variable_get(BREAKPOINTS_CLASS_SETTINGS_DEBUG, FALSE),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Configuration form validation.
+ */
+function breakpoints_class_config_form_validate($form, &$form_state) {
+  // Class can't start with number or dash value.
+  $first_char = $form_state['input']['breakpoints_class_prefix'][0];
+  if (is_numeric($first_char) || $first_char == '-') {
+    form_set_error('breakpoints_class_prefix', t('HTML class can\'t start with this character. That\'s the rules. Sorry. Use regular english letter instead.'));
+  }
+
+  // Remove all special characters and spaces which are not allowed for classes.
+  $form_state['values']['breakpoints_class_prefix'] = preg_replace('/[^A-Za-z0-9\-]/', '', $form_state['input']['breakpoints_class_prefix']);
+}
+
+/**
+ * Implements hook_page_alter().
+ *
+ * Add all needed breakpoints information to Drupal.settings.breakpoints_class
+ * javascript object.
+ *
+ * @see breakpoints_breakpoint_load_all()
+ */
+function breakpoints_class_page_alter(&$page) {
+  // Allow to add class only on needed themes.
+  global $theme;
+  $allowed_themes = variable_get(BREAKPOINTS_CLASS_SETTINGS_THEMES, array(variable_get('theme_default')));
+  $is_currently_needed = $allowed_themes[$theme] ? TRUE : FALSE;
+
+  // Cache breakpoints information.
+  $cached = cache_get(BREAKPOINTS_CLASS_CACHE_ID, 'cache');
+  if (!$cached || empty($cached->data)) {
+    $breakpoints = breakpoints_breakpoint_load_all();
+    $breakpoints_js_config = array();
+    foreach ($breakpoints as $breakpoint) {
+      $breakpoints_js_config[$breakpoint->name] = $breakpoint->breakpoint;
+    }
+    cache_set(BREAKPOINTS_CLASS_CACHE_ID, $breakpoints_js_config);
+  }
+  else {
+    $breakpoints_js_config = $cached->data;
+  }
+
+  // Add configuration to Drupal.settings.breakpoints_class javascript object.
+  drupal_add_js(
+    array(
+      'breakpoints_class' => array(
+        'debug'       => variable_get(BREAKPOINTS_CLASS_SETTINGS_DEBUG, FALSE),
+        'prefix'      => variable_get(BREAKPOINTS_CLASS_SETTINGS_PREFIX, ''),
+        'breakpoints' => $breakpoints_js_config,
+        'isNeeded'    => $is_currently_needed,
+      )
+    ),
+    'setting'
+  );
+}
