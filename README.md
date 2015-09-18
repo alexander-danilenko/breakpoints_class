@@ -3,7 +3,7 @@ This module adds classes to Body tag of page based on configured <a href="https:
 <h2>Why not <a href="https://www.drupal.org/project/browserclass">Browserclass</a>?</h2>
 Do you like Browserclass module as we do? So you know that changing of browser window size not changes classes that applied to Body tag. It happens because Browserclass module logic is based on User-agent and works totally in backend. 
 
-<strong>Brekpoints class</strong> module can add and remove classes to body tag just on window resize and matching/unmatching of breakpoints.
+<strong>Breakpoints class</strong> module can add and remove classes to body tag just on window resize and matching/unmatching of breakpoints.
 
 <h2>Usecases:</h2>
 <ul>
@@ -23,7 +23,7 @@ Do you like Browserclass module as we do? So you know that changing of browser w
 
 <h2>Installation</h2>
 <ul>
-	<li>Enable <strong>Brekpoints class</strong> module</li>
+	<li>Enable <strong>Breakpoints class</strong> module</li>
 	<li>Add some breakpoints with <a href="https://www.drupal.org/project/breakpoints">Breakpoints</a> module</li>
 	<li>Add <a href="http://wicky.nillia.ms/enquire.js/">Enquire.js</a> library.*</li>
 	<li>Enjoy</li>
