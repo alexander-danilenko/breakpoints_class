@@ -26,8 +26,8 @@ Do you like Browserclass module as we do? So you know that changing of browser w
 <h2>Installation</h2>
 <ul>
 	<li>Enable <strong>Breakpoints class</strong> module</li>
-	<li>Download <a href="http://wicky.nillia.ms/enquire.js/">Enquire.js</a> library to <code>/sites/all/libraries/enquire.js/</code> folder.</li>
-	<li><em>(optional)</em> Download <a href="http://wicky.nillia.ms/enquire.js/">matchMedia.js</a> library to <code>/sites/all/libraries/matchMedia.js/</code> folder for better IE compatibility.</li>
+	<li>Download <a href="https://github.com/WickyNilliams/enquire.js/">Enquire.js</a> library to <code>/sites/all/libraries/enquire.js/</code> folder.</li>
+	<li><em>(optional)</em> Download <a href="https://github.com/paulirish/matchMedia.js/">matchMedia.js</a> library to <code>/sites/all/libraries/matchMedia.js/</code> folder for better IE compatibility.</li>
 	<li>Add some breakpoints with <a href="https://www.drupal.org/project/breakpoints">Breakpoints</a> module</li>
 	<li>Enjoy your classes!</li>
 </ul>
