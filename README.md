@@ -1,3 +1,5 @@
+<h1>Breakpoints class module</h1>
+
 This module adds classes to Body tag of page based on configured <a href="https://www.drupal.org/project/breakpoints">Breakpoints</a> via Javascript.
 
 <h2>Why not <a href="https://www.drupal.org/project/browserclass">Browserclass</a>?</h2>
@@ -24,11 +26,12 @@ Do you like Browserclass module as we do? So you know that changing of browser w
 <h2>Installation</h2>
 <ul>
 	<li>Enable <strong>Breakpoints class</strong> module</li>
+	<li>Download <a href="http://wicky.nillia.ms/enquire.js/">Enquire.js</a> library to <code>/sites/all/libraries/enquire.js/</code> folder.</li>
+	<li><em>(optional)</em> Download <a href="http://wicky.nillia.ms/enquire.js/">matchMedia.js</a> library to <code>/sites/*/libraries/matchMedia.js/</code> folder for better IE compatibility.</li>
 	<li>Add some breakpoints with <a href="https://www.drupal.org/project/breakpoints">Breakpoints</a> module</li>
-	<li>Add <a href="http://wicky.nillia.ms/enquire.js/">Enquire.js</a> library.*</li>
-	<li>Enjoy</li>
+	<li>Enjoy your classes!</li>
 </ul>
-<em>* Library can be added custom way in your module/theme <strong>OR</strong> in most prefered way: using <a href="https://www.drupal.org/project/library_pack">library_pack</a> module.</em>
+<em>Also libraries can be added using <a href="https://www.drupal.org/project/library_pack">library_pack</a> module.</em>
 
 <h2>Functionality</h2>
 <ul>
