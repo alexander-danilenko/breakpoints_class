@@ -50,7 +50,7 @@
             });
           } catch (message) {
             console.error(Drupal.t('Seems like Enquire.js library is not loaded. Original error message:') + ' ' + message);
-            console.warn(Drupal.t('You can include Enquire.js library by your own or using module:') + ' https://www.drupal.org/project/library_pack');
+            console.warn(Drupal.t('For downloading Enquire.js see Reports section for details:') + ' ' + window.location.origin + Drupal.settings.basePath + 'admin/reports/status');
           }
         });
       }

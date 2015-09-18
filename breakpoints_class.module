@@ -8,6 +8,13 @@ define('BREAKPOINTS_CLASS_SETTINGS_PREFIX', 'breakpoints_class_prefix');
 define('BREAKPOINTS_CLASS_SETTINGS_DEBUG', 'breakpoints_class_debug');
 define('BREAKPOINTS_CLASS_SETTINGS_THEMES', 'breakpoints_class_themes');
 
+// Enqure.js
+define('BREAKPOINTS_CLASS_ENQUIRE_DOWNLOAD_URL', 'https://github.com/WickyNilliams/enquire.js');
+define('BREAKPOINTS_CLASS_ENQUIRE_DOWNLOAD_FOLDER', '/sites/*/libraries/enquire.js/');
+// matchMedia.js
+define('BREAKPOINTS_CLASS_MATCH_MEDIA_DOWNLOAD_URL', 'https://github.com/paulirish/matchMedia.js');
+define('BREAKPOINTS_CLASS_MATCH_MEDIA_DOWNLOAD_FOLDER', '/sites/*/libraries/matchMedia.js/');
+
 /**
  * Implements hook_menu().
  */
@@ -110,7 +117,14 @@ function breakpoints_class_page_alter(&$page) {
     $breakpoints_js_config = $cached->data;
   }
 
-  // Add configuration to Drupal.settings.breakpoints_class javascript object.
+  // If Libraries needs to be loaded.
+  if($is_currently_needed) {
+    // Load all needed libraries on needed themes.
+    libraries_load('enquire.js');
+    libraries_load('matchMedia.js');
+  }
+
+  // Add configuration to Drupal.settings.breakpoints_class javascript object for all themes.
   drupal_add_js(
     array(
       'breakpoints_class' => array(
@@ -122,4 +136,130 @@ function breakpoints_class_page_alter(&$page) {
     ),
     'setting'
   );
+}
+
+/**
+ * Implements hook_libraries_info().
+ */
+function breakpoints_class_libraries_info() {
+  // enquire.js
+  $libraries['enquire.js'] = array(
+    'name'              => 'Enquire JS',
+    'vendor url'        => BREAKPOINTS_CLASS_ENQUIRE_DOWNLOAD_URL,
+    'download url'      => BREAKPOINTS_CLASS_ENQUIRE_DOWNLOAD_URL,
+    'version arguments' => array(
+      'file'    => 'dist/enquire.js',
+      'pattern' => '/enquire.js v([0-9a-zA-Z\.-]+)/',
+    ),
+    'files'             => array(
+      'js' => array(
+        'dist/enquire.js' => array(
+          'every_page' => TRUE,
+          'group'      => JS_LIBRARY,
+          'preprocess' => 0,
+          'scope'      => 'header',
+          'type'       => 'file',
+          'weight'     => -9999,
+        )
+      ),
+    ),
+    'variants'          => array(
+      'minified' => array(
+        'files' => array(
+          'js' => array(
+            'dist/enquire.min.js'
+          ),
+        ),
+      ),
+    ),
+  );
+
+  // Matchmedia
+  $libraries['matchMedia.js'] = array(
+    'name'              => 'matchMedia.js',
+    'vendor url'        => BREAKPOINTS_CLASS_MATCH_MEDIA_DOWNLOAD_URL,
+    'download url'      => BREAKPOINTS_CLASS_MATCH_MEDIA_DOWNLOAD_URL,
+    'version arguments' => array(
+      'file'    => 'bower.json',
+      'pattern' => '/version": "([0-9a-zA-Z\.-]+)/',
+    ),
+    'files'             => array(
+      'js' => array(
+        'matchMedia.js' => array(
+          'every_page' => TRUE,
+          'group'      => JS_LIBRARY,
+          'preprocess' => 0,
+          'scope'      => 'header',
+          'type'       => 'file',
+          'weight'     => -9999,
+        ),
+      )
+    ),
+    'variants'          => array(
+      'addListener' => array(
+        'files' => array(
+          'js' => array(
+            'matchMedia.js'             => array(
+              'every_page' => TRUE,
+              'group'      => JS_LIBRARY,
+              'preprocess' => 0,
+              'scope'      => 'header',
+              'type'       => 'file',
+              'weight'     => -9999,
+            ),
+            'matchMedia.addListener.js' => array(
+              'every_page' => TRUE,
+              'group'      => JS_LIBRARY,
+              'preprocess' => 0,
+              'scope'      => 'header',
+              'type'       => 'file',
+              'weight'     => -9998,
+            ),
+          )
+        ),
+      ),
+    ),
+  );
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function breakpoints_class_requirements($phase) {
+  $requirements = array();
+
+  // Collect all needed libraries.
+  $libraries = array();
+  $libraries['enquire.js'] = libraries_detect('enquire.js');
+  $libraries['matchMedia.js'] = libraries_detect('matchMedia.js');
+
+  switch ($phase) {
+    case 'runtime':
+      $requirements['breakpoints_class_enquirejs_library'] = array(
+        'title'    => t('Enquire.js library'),
+        'value'    => $libraries['enquire.js']['installed'] ? t('enquire.js library installed.') : $libraries['enquire.js']['error message'] . ' ' . t('It is required for Breakpoints Classes module. Please download library into @folder folder from !download_link', array(
+            '!download_link' => l(BREAKPOINTS_CLASS_ENQUIRE_DOWNLOAD_URL, BREAKPOINTS_CLASS_ENQUIRE_DOWNLOAD_URL),
+            '@folder'        => BREAKPOINTS_CLASS_ENQUIRE_DOWNLOAD_FOLDER
+          )),
+        'severity' => $libraries['enquire.js']['installed'] ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+        'weight'   => 100,
+      );
+
+      // matchMedia.js
+      $requirements['breakpoints_class_match_media_library'] = array(
+        'title'    => t('matchMedia.js library'),
+        'value'    => $libraries['matchMedia.js']['installed'] ? t('matchMedia.js library installed.') : $libraries['matchMedia.js']['error message'] . ' ' . t('For better support of Breakpoints Classes module in IE please download library into @folder folder from !download_link', array(
+            '!download_link' => l(BREAKPOINTS_CLASS_MATCH_MEDIA_DOWNLOAD_URL, BREAKPOINTS_CLASS_MATCH_MEDIA_DOWNLOAD_URL),
+            '@folder'        => BREAKPOINTS_CLASS_MATCH_MEDIA_DOWNLOAD_FOLDER
+          )),
+        'severity' => $libraries['matchMedia.js']['installed'] ? REQUIREMENT_OK : REQUIREMENT_WARNING,
+        'weight'   => 100,
+      );
+
+      break;
+  }
+
+  return $requirements;
 }
